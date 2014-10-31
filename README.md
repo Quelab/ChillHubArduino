@@ -31,7 +31,7 @@ Available Functions
 void subscribe(unsigned char type, chillhubCallbackFunction cb);
 void unsubscribe(unsigned char type);
 ```
-These functions allow your USB device to subscribe to or unsubscribe from data originating from the fridge.  ChillHub supports the same data streams as green-bean (https://github.com/GEMakers/gea-plugin-refrigerator).  When using these functions, use values from the ChillHubDataTypes enum (in chillhub.h) for the _type_ field.  When creating your callback function, you'll need to ensure that the argument to your callback function matches the data type returned by the subscription's data stream (see **Message Types** below).
+These functions allow your USB device to subscribe to or unsubscribe from data originating from the fridge.  ChillHub supports the same data streams as green-bean (https://github.com/GEMakers/gea-plugin-refrigerator).  When using these functions, use values from the ChillHubDataTypes enum (in chillhub.h) for the _type_ field.  When creating your callback function, you'll need to ensure that the argument to your callback function matches the data type returned by the subscription's data stream.
 
 ###Alarms and Time
 ```c++
@@ -39,7 +39,7 @@ void setAlarm(unsigned char ID, char* cronString, unsigned char strLength, chill
 void unsetAlarm(unsigned char ID);
 void getTime(chillhubCallbackFunction cb);
 ```
-These functions give your USB device the ability to find out the current local real-time as well as to be notified when particular times occur.  Note that the ID field in setAlarm and unsetAlarm is a unique identifier for you to manage your device's alarms.  Further, note that the callback functions used here accepts a ```unsigned char[4]``` argument and, as noted below, the argument's contents will be _[month, day, hour, minute]_.
+These functions give your USB device the ability to find out the current local real-time as well as to be notified when particular times occur.  Note that the ID field in setAlarm and unsetAlarm is a unique identifier for you to manage your device's alarms.  Further, note that the callback functions used here accepts a ```unsigned char[4]``` argument and the argument's contents will be _[month, day, hour, minute]_.
 
 ###Data to/from the Cloud
 ```c++
@@ -50,4 +50,4 @@ void sendI8Msg(unsigned char msgType, signed char payload);
 void sendI16Msg(unsigned char msgType, signed int payload);
 void sendBooleanMsg(unsigned char msgType, unsigned char payload);
 ```
-Still under construction.
+These functions allow communication to and from the ChilHub data store; see the Inventory Management Platform project (https://github.com/FirstBuild/InventoryMgmt).  The schema for each ChillHub peripheral defines what these message types are and the payload and callback functions used in the Arduino must match the schema.
