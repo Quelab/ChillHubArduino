@@ -52,7 +52,7 @@ void chInterface::sendBooleanMsg(unsigned char msgType, unsigned char payload) {
   buf[0] = 3;
   buf[1] = msgType;
   buf[2] = booleanDataType;
-  buf[3] = payoad;
+  buf[3] = payload;
   Serial.write(buf, 4);
 }
 
@@ -100,7 +100,7 @@ void chInterface::getTime(chillhubCallbackFunction cb) {
 }
 
 void chInterface::addCloudListener(unsigned char ID, chillhubCallbackFunction cb) {
-  storeCallbackEntry(ID+0x50, CHILLHUB_CB_TYPE_CLOUD, cb);
+  storeCallbackEntry(ID, CHILLHUB_CB_TYPE_CLOUD, cb);
 }
 
 void chInterface::loop() {

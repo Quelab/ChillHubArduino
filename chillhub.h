@@ -41,6 +41,7 @@ class chInterface {
     static void sendU16Msg(unsigned char msgType, unsigned int payload);
     static void sendI8Msg(unsigned char msgType, signed char payload);
     static void sendI16Msg(unsigned char msgType, signed int payload);
+    static void sendBooleanMsg(unsigned char msgType, unsigned char payload);
     
     static void loop();
 };
