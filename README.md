@@ -24,11 +24,11 @@ void loop() {
  ChillHub.loop();
 }
 ```
-Obviously, replacing "your_name_here" you've selected for your ChillHub accessory.  Your UUID needs to be a 
+Obviously, replace "your_name_here" with the name you've selected for your ChillHub accessory.  Your UUID needs to be a 
 [Version 4](http://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_.28random.29) random UUID. 
 
 You can set the UUID on your device by using the set-device-uuid.js script located in the
-[ChillHub firmware](https://github.com/FirstBuild/chillhub-firmware).  Simple plug your device into you computer and execute:
+[ChillHub firmware](https://github.com/FirstBuild/chillhub-firmware).  Simple plug your device into your computer and executing:
 ```
 sudo node set-device-uuid.js
 ```
@@ -60,13 +60,21 @@ To register a read-only device in the cloud
 ChillHub.createCloudResourceU16("Analog", AnalogID, 0, 0);
 ```
 To register a cloud resource and a listener to update that resource:
-```
-chillhub.addcloudlistener(ledid, (chillhubcallbackfunction)setled);
-chillhub.createcloudresourceu16("led", ledid, 1, 0);
+```c++
+ChillHub.addCloudListener(LedID, (chillhubCallbackFunction)setLed);
+ChillHub.createCloudResourceU16("LED", LedID, 1, 0);
 
 static void setLed(uint8_t value) {
    digitalWrite(LedL, value);
 }
+```
+Each cloud resource must have a unique ID and name.  You can ensure that each device has a unique ID by using an enum as follows:
+```c++
+enum E_CloudIDs {
+  LedID = 0x91,
+  AnalogID = 0x92,
+  LastID
+};
 ```
 
 
