@@ -98,7 +98,7 @@ void deviceAnnounce() {
   // Each device must has a unique version 4 UUID.  See
   // http://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_.28random.29
   // for details.
-  ChillHub.setName("chilldemo", eeprom.store.UUID);
+  ChillHub.setup("chilldemo", eeprom.store.UUID);
   
   // add a listener for device ID request type
   // Device ID is a request from the chill hub for the Arduino to register itself.

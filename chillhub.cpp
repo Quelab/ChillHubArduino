@@ -195,7 +195,7 @@ void chInterface::sendBooleanMsg(unsigned char msgType, unsigned char payload) {
   sendPacket(buf, index);
 }
 
-void chInterface::setName(const char* name, const char *UUID) {
+void chInterface::setup(const char* name, const char *UUID) {
   uint8_t buf[128];
   uint8_t nameLen = strlen(name);
   uint8_t uuidLen = strlen(UUID);

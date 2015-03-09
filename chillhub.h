@@ -78,7 +78,7 @@ class chInterface {
   
   public:
     chInterface(void);
-    static void setName(const char* name, const char *UUID);
+    static void setup(const char* name, const char *UUID);
     static void subscribe(unsigned char type, chillhubCallbackFunction cb);
     static void unsubscribe(unsigned char type);
     static void setAlarm(unsigned char ID, char* cronString, unsigned char strLength, chillhubCallbackFunction cb);

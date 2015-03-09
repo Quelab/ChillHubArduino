@@ -14,19 +14,29 @@ Start off your arduino sketch with
 ```c++
 #include "chillhub.h"
 
+chInterface ChillHub;
+
 void setup() {
- ChillHub.setup("your_name_here", 14);
+ ChillHub.setup("your_name_here", UUID);
 }
 
 void loop() {
  ChillHub.loop();
 }
 ```
-Obviously, replacing "your_name_here" with whatever ID you've selected for your ChillHub accessory.
+Obviously, replacing "your_name_here" you've selected for your ChillHub accessory.  Your UUID needs to be a 
+[Version 4](http://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_.28random.29) random UUID. 
+
+You can set the UUID on your device by using the set-device-uuid.js script located in the
+[ChillHub firmware](https://github.com/FirstBuild/chillhub-firmware).  Simple plug your device into you computer and execute:
+```
+sudo node set-device-uuid.js
+```
 
 Available Functions
 -------------------
 ###Data From Fridge
+*Note: Communication with the fridge is currently disabled in ChillHub.*
 ```c++
 void subscribe(unsigned char type, chillhubCallbackFunction cb);
 void unsubscribe(unsigned char type);
@@ -42,12 +52,22 @@ void getTime(chillhubCallbackFunction cb);
 These functions give your USB device the ability to find out the current local real-time as well as to be notified when particular times occur.  Note that the ID field in setAlarm and unsetAlarm is a unique identifier for you to manage your device's alarms.  Because of the way that this is used, it is important the ID be an ascii printable character.  Further, note that the callback functions used here accepts a ```unsigned char[4]``` argument and the argument's contents will be _[month, day, hour, minute]_.
 
 ###Data to/from the Cloud
+Data can be exchanged with the cloud.  The device registers resources with the cloud in order to make data from your device available remotely.
+Additionally, a listener can be added for each resource to allow the resource on your device to be modified remotely.
+
+To register a read-only device in the cloud
 ```c++
-void addCloudListener(unsigned char msgType, chillhubCallbackFunction cb);
-void sendU8Msg(unsigned char msgType, unsigned char payload);
-void sendU16Msg(unsigned char msgType, unsigned int payload);
-void sendI8Msg(unsigned char msgType, signed char payload);
-void sendI16Msg(unsigned char msgType, signed int payload);
-void sendBooleanMsg(unsigned char msgType, unsigned char payload);
+ChillHub.createCloudResourceU16("Analog", AnalogID, 0, 0);
 ```
+To register a cloud resource and a listener to update that resource:
+```
+chillhub.addcloudlistener(ledid, (chillhubcallbackfunction)setled);
+chillhub.createcloudresourceu16("led", ledid, 1, 0);
+
+static void setLed(uint8_t value) {
+   digitalWrite(LedL, value);
+}
+```
+
+
 These functions allow communication to and from the ChilHub data store; see the Inventory Management Platform project (https://github.com/FirstBuild/InventoryMgmt).  The schema for each ChillHub peripheral defines what these message types are and the payload and callback functions used in the Arduino must match the schema.
