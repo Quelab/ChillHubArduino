@@ -1,6 +1,6 @@
 ChillHubArduino
 ===============
-ChillHub is a system for creating USB devices that extend the functionality of your fridge.  It consists of a raspberry pi (http://www.raspberrypi.org/), a green bean (https://firstbuild.com/greenbean/), and a USB hub in a refrigerator door.  ChillHub acts as a mailman the delivers messages from the cloud and the fridge to USB devices and from the USB devices back to the cloud.
+ChillHub is a system for creating USB devices that extend the functionality of your fridge.  It consists of a raspberry pi (http://www.raspberrypi.org/), a green bean (https://firstbuild.com/greenbean/), and a USB hub in a refrigerator door.  ChillHub acts as a mailman that delivers messages from the cloud and the fridge to USB devices and from the USB devices back to the cloud.
 
 ChillHub compatible USB peripherals communicate with ChillHub over USB serial.  This project contains an arduino library for developing such peripherals.
 
