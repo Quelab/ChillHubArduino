@@ -41,7 +41,7 @@ Eeprom eeprom;
 const char defaultUUID[] = "41e1b18e-2d12-4306-9211-c1068bf7f76d";
 
 // register the name (type) of this device with the chillhub
-// syntax is ChillHub.setup(DEVICE_NAME, LENGTH_OF_DEVICE_NAME);
+// syntax is ChillHub.setup(device type, UUID);
 chInterface ChillHub;
 
 //
