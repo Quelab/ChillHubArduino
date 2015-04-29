@@ -61,6 +61,7 @@ class chInterface {
     static uint8_t appendJsonString(uint8_t *pBuf, const char *s);
     static uint8_t appendJsonU8(uint8_t *pBuf, uint8_t v);
     static uint8_t appendJsonU16(uint8_t *pBuf, uint16_t v);
+    static uint8_t appendJsonU32(uint8_t *pBuf, uint32_t v);
     static uint8_t sizeOfJsonKey(const char *key);
     static void processChillhubMessagePayload(void);
     static void ReadFromSerialPort(void);
@@ -86,7 +87,9 @@ class chInterface {
     static void getTime(chillhubCallbackFunction cb);
     static void addCloudListener(unsigned char msgType, chillhubCallbackFunction cb);
     static void createCloudResourceU16(const char *name, uint8_t resId, uint8_t canUpdate, uint16_t initVal);
+    static void createCloudResourceU32(const char *name, uint8_t resId, uint8_t canUpdate, uint32_t initVal);
     static void updateCloudResourceU16(uint8_t resID, uint16_t val);
+    static void updateCloudResourceU32(uint8_t resID, uint32_t val);
     
     static void sendU8Msg(unsigned char msgType, unsigned char payload);
     static void sendU16Msg(unsigned char msgType, unsigned int payload);

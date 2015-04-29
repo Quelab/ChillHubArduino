@@ -20,6 +20,7 @@
 static const char resIdKey[] = "resID";
 static const char valKey[] = "val";
 
+static const uint8_t sizeOfU32JsonField = 5;
 static const uint8_t sizeOfU16JsonField = 3;
 static const uint8_t sizeOfU8JsonField = 2;
 
@@ -302,6 +303,16 @@ uint8_t chInterface::appendJsonU16(uint8_t *pBuf, uint16_t v) {
   return 3;
 }
 
+uint8_t chInterface::appendJsonU32(uint8_t *pBuf, uint32_t v) {
+  *pBuf++ = unsigned32DataType;
+  *pBuf++ = (((v) & 0xFF000000)>>32);
+  *pBuf++ = (((v) & 0xFF0000)>>16);
+  *pBuf++ = (((v) & 0xFF00)>>8);
+  *pBuf++ = ((v) &  0xFF);
+
+  return 5;
+}
+
 void chInterface::createCloudResourceU16(const char *name, uint8_t resID, uint8_t canUpdate, uint16_t initVal) {
   uint8_t buf[256];
   uint8_t index=0;
@@ -328,6 +339,32 @@ void chInterface::createCloudResourceU16(const char *name, uint8_t resID, uint8_
   sendPacket(buf, index);
 }
 
+void chInterface::createCloudResourceU32(const char *name, uint8_t resID, uint8_t canUpdate, uint32_t initVal) {
+  uint8_t buf[256];
+  uint8_t index=0;
+  
+  // set up message header and send
+  index = 0;
+  buf[index++] = 37 + strlen(name); // length
+  buf[index++] = registerResourceType; // message type
+  buf[index++] = jsonDataType; // message data type
+  buf[index++] = 4; // JSON fields
+
+  index += appendJsonKey(&buf[index], "name");
+  index += appendJsonString(&buf[index], name);
+  
+  index += appendJsonKey(&buf[index], resIdKey);
+  index += appendJsonU8(&buf[index], resID);
+
+  index += appendJsonKey(&buf[index], "canUp");
+  index += appendJsonU8(&buf[index], canUpdate);
+  
+  index += appendJsonKey(&buf[index], "initVal");
+  index += appendJsonU32(&buf[index], initVal);
+  
+  sendPacket(buf, index);
+}
+
 uint8_t chInterface::sizeOfJsonKey(const char *key) {
   return strlen(key) + 1;  
 }
@@ -348,6 +385,26 @@ void chInterface::updateCloudResourceU16(uint8_t resID, uint16_t val) {
   index += appendJsonU8(&buf[index], resID);
   index += appendJsonKey(&buf[index], valKey);
   index += appendJsonU16(&buf[index], val);
+  
+  sendPacket(buf, index);
+}
+
+void chInterface::updateCloudResourceU32(uint8_t resID, uint32_t val) {
+  uint8_t buf[64];
+  uint8_t index = 0;
+
+  buf[index++] = 3 + 
+    sizeOfJsonKey(resIdKey) + sizeOfU8JsonField +
+    sizeOfJsonKey(valKey) + sizeOfU32JsonField;
+    
+  buf[index++] = updateResourceType;
+  buf[index++] = jsonDataType;
+  buf[index++] = 2; // number of json fields
+  
+  index += appendJsonKey(&buf[index], resIdKey);
+  index += appendJsonU8(&buf[index], resID);
+  index += appendJsonKey(&buf[index], valKey);
+  index += appendJsonU32(&buf[index], val);
   
   sendPacket(buf, index);
 }
