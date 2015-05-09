@@ -8,10 +8,10 @@
 #define DebugUart_UartPutString(...)
 #define DebugUart_SpiUartWriteTxData(...)
 #ifndef MSB_OF_U16
-  #define MSB_OF_U16(v) ((v>>8)&0x00ff) 
+  #define MSB_OF_U16(v) ((v>>8)&0x00ff)
 #endif
 #ifndef LSB_OF_U16
-  #define LSB_OF_U16(v) (v&0x00ff) 
+  #define LSB_OF_U16(v) (v&0x00ff)
 #endif
 
 #define STX 0xff
@@ -52,14 +52,14 @@ chInterface::chInterface(void) {
 void chInterface::printU8(uint8_t val) {
   uint8_t digits[3];
   uint8_t i;
-  
+
   for (i=0; i<sizeof(digits); i++) {
     digits[sizeof(digits)-i-1] = val % 10;
     val = val / 10;
   }
 
   for(i=0; (i<(sizeof(digits)-1))&&(digits[i] == 0); i++);
-  
+
   for (; i<sizeof(digits); i++) {
     DebugUart_SpiUartWriteTxData(digits[i]+'0');
   }
@@ -68,14 +68,14 @@ void chInterface::printU8(uint8_t val) {
 void chInterface::printU16(uint16_t val) {
   uint8_t digits[5];
   uint8_t i;
-  
+
   for (i=0; i<sizeof(digits); i++) {
     digits[sizeof(digits)-i-1] = val % 10;
     val = val / 10;
   }
 
   for(i=0; (i<(sizeof(digits)-1))&&(digits[i] == 0); i++);
-  
+
   for (; i<sizeof(digits); i++) {
     DebugUart_SpiUartWriteTxData(digits[i]+'0');
   }
@@ -84,19 +84,19 @@ void chInterface::printU16(uint16_t val) {
 void chInterface::printI16(int16_t val) {
   uint8_t digits[5];
   uint8_t i;
-  
+
   if (val < 0) {
     DebugUart_SpiUartWriteTxData('-');
     val = -val;
   }
-  
+
   for (i=0; i<sizeof(digits); i++) {
     digits[sizeof(digits)-i-1] = val % 10;
     val = val / 10;
   }
 
   for(i=0; (i<(sizeof(digits)-1))&&(digits[i] == 0); i++);
-  
+
   for (; i<sizeof(digits); i++) {
     DebugUart_SpiUartWriteTxData(digits[i]+'0');
   }
@@ -105,14 +105,14 @@ void chInterface::printI16(int16_t val) {
 void chInterface::printU32(uint32_t val) {
   uint8_t digits[10];
   uint8_t i;
-  
+
   for (i=0; i<sizeof(digits); i++) {
     digits[sizeof(digits)-i-1] = val % 10;
     val = val / 10;
   }
 
   for(i=0; (i<(sizeof(digits)-1))&&(digits[i] == 0); i++);
-  
+
   for (; i<sizeof(digits); i++) {
     DebugUart_SpiUartWriteTxData(digits[i]+'0');
   }
@@ -133,7 +133,7 @@ void chInterface::printI32(int32_t val) {
   }
 
   for(i=0; (i<(sizeof(digits)-1))&&(digits[i] == 0); i++);
-  
+
   for (; i<sizeof(digits); i++) {
     DebugUart_SpiUartWriteTxData(digits[i]+'0');
   }
@@ -153,7 +153,7 @@ void chInterface::sendU8Msg(unsigned char msgType, unsigned char payload) {
 void chInterface::sendI8Msg(unsigned char msgType, signed char payload) {
   uint8_t buf[16];
   uint8_t index=0;
-  
+
   buf[index++] = 3;
   buf[index++] = msgType;
   buf[index++] = signed8DataType;
@@ -201,14 +201,14 @@ void chInterface::setup(const char* name, const char *UUID) {
   uint8_t nameLen = strlen(name);
   uint8_t uuidLen = strlen(UUID);
   uint8_t index=0;
-  
+
   memset(buf, 0, sizeof(buf));
-  
+
   // Is the buf big enough to send the name?
   if ((nameLen + uuidLen) >= (sizeof(buf)-20)) {
     return;
   }
-    
+
   // send header info
   buf[index++] = nameLen + uuidLen + 6; // length of the following message
   buf[index++] = deviceIdMsgType;
@@ -220,7 +220,7 @@ void chInterface::setup(const char* name, const char *UUID) {
   buf[index++] = nameLen;
   strcat((char *)&buf[index], name);
   index += nameLen;
-  
+
   // send UUID
   buf[index++] = uuidLen;
   strcat((char *)&buf[index], UUID);
@@ -242,7 +242,7 @@ void chInterface::setAlarm(unsigned char ID, char* cronString, unsigned char str
   uint8_t buf[256];
   uint8_t index=0;
 
-  storeCallbackEntry(ID, CHILLHUB_CB_TYPE_CRON, callback);  
+  storeCallbackEntry(ID, CHILLHUB_CB_TYPE_CRON, callback);
 
   buf[index++] = strLength + 4; // message length
   buf[index++] = setAlarmMsgType;
@@ -262,7 +262,7 @@ void chInterface::unsetAlarm(unsigned char ID) {
 void chInterface::getTime(chillhubCallbackFunction cb) {
   uint8_t buf[16];
   uint8_t index=0;
-  
+
   storeCallbackEntry(0, CHILLHUB_CB_TYPE_TIME, cb);
 
   buf[index++] = 1;
@@ -313,10 +313,33 @@ uint8_t chInterface::appendJsonU32(uint8_t *pBuf, uint32_t v) {
   return 5;
 }
 
+uint8_t chInterface::appendJsonI8(uint8_t *pBuf, int8_t v) {
+  *pBuf++ = signed8DataType;
+  *pBuf++ = v;
+  return 2;
+}
+
+uint8_t chInterface::appendJsonI16(uint8_t *pBuf, int16_t v) {
+  *pBuf++ = signed16DataType;
+  *pBuf++ = MSB_OF_U16(v);
+  *pBuf++ = LSB_OF_U16(v);
+  return 3;
+}
+
+uint8_t chInterface::appendJsonI32(uint8_t *pBuf, int32_t v) {
+  *pBuf++ = signed32DataType;
+  *pBuf++ = (((v) & 0xFF000000)>>32);
+  *pBuf++ = (((v) & 0xFF0000)>>16);
+  *pBuf++ = (((v) & 0xFF00)>>8);
+  *pBuf++ = ((v) &  0xFF);
+
+  return 5;
+}
+
 void chInterface::createCloudResourceU16(const char *name, uint8_t resID, uint8_t canUpdate, uint16_t initVal) {
   uint8_t buf[256];
   uint8_t index=0;
-  
+
   // set up message header and send
   index = 0;
   buf[index++] = 37 + strlen(name); // length
@@ -326,23 +349,50 @@ void chInterface::createCloudResourceU16(const char *name, uint8_t resID, uint8_
 
   index += appendJsonKey(&buf[index], "name");
   index += appendJsonString(&buf[index], name);
-  
+
   index += appendJsonKey(&buf[index], resIdKey);
   index += appendJsonU8(&buf[index], resID);
 
   index += appendJsonKey(&buf[index], "canUp");
   index += appendJsonU8(&buf[index], canUpdate);
-  
+
   index += appendJsonKey(&buf[index], "initVal");
   index += appendJsonU16(&buf[index], initVal);
-  
+
   sendPacket(buf, index);
 }
+
+void chInterface::createCloudResourceI16(const char *name, uint8_t resID, uint8_t canUpdate, int16_t initVal) {
+  uint8_t buf[256];
+  uint8_t index=0;
+
+  // set up message header and send
+  index = 0;
+  buf[index++] = 37 + strlen(name); // length
+  buf[index++] = registerResourceType; // message type
+  buf[index++] = jsonDataType; // message data type
+  buf[index++] = 4; // JSON fields
+
+  index += appendJsonKey(&buf[index], "name");
+  index += appendJsonString(&buf[index], name);
+
+  index += appendJsonKey(&buf[index], resIdKey);
+  index += appendJsonU8(&buf[index], resID);
+
+  index += appendJsonKey(&buf[index], "canUp");
+  index += appendJsonU8(&buf[index], canUpdate);
+
+  index += appendJsonKey(&buf[index], "initVal");
+  index += appendJsonI16(&buf[index], initVal);
+
+  sendPacket(buf, index);
+}
+
 
 void chInterface::createCloudResourceU32(const char *name, uint8_t resID, uint8_t canUpdate, uint32_t initVal) {
   uint8_t buf[256];
   uint8_t index=0;
-  
+
   // set up message header and send
   index = 0;
   buf[index++] = 37 + strlen(name); // length
@@ -352,40 +402,86 @@ void chInterface::createCloudResourceU32(const char *name, uint8_t resID, uint8_
 
   index += appendJsonKey(&buf[index], "name");
   index += appendJsonString(&buf[index], name);
-  
+
   index += appendJsonKey(&buf[index], resIdKey);
   index += appendJsonU8(&buf[index], resID);
 
   index += appendJsonKey(&buf[index], "canUp");
   index += appendJsonU8(&buf[index], canUpdate);
-  
+
   index += appendJsonKey(&buf[index], "initVal");
   index += appendJsonU32(&buf[index], initVal);
-  
+
+  sendPacket(buf, index);
+}
+
+void chInterface::createCloudResourceI32(const char *name, uint8_t resID, uint8_t canUpdate, int32_t initVal) {
+  uint8_t buf[256];
+  uint8_t index=0;
+
+  // set up message header and send
+  index = 0;
+  buf[index++] = 37 + strlen(name); // length
+  buf[index++] = registerResourceType; // message type
+  buf[index++] = jsonDataType; // message data type
+  buf[index++] = 4; // JSON fields
+
+  index += appendJsonKey(&buf[index], "name");
+  index += appendJsonString(&buf[index], name);
+
+  index += appendJsonKey(&buf[index], resIdKey);
+  index += appendJsonU8(&buf[index], resID);
+
+  index += appendJsonKey(&buf[index], "canUp");
+  index += appendJsonU8(&buf[index], canUpdate);
+
+  index += appendJsonKey(&buf[index], "initVal");
+  index += appendJsonI32(&buf[index], initVal);
+
   sendPacket(buf, index);
 }
 
 uint8_t chInterface::sizeOfJsonKey(const char *key) {
-  return strlen(key) + 1;  
+  return strlen(key) + 1;
 }
 
 void chInterface::updateCloudResourceU16(uint8_t resID, uint16_t val) {
   uint8_t buf[64];
   uint8_t index = 0;
 
-  buf[index++] = 3 + 
+  buf[index++] = 3 +
     sizeOfJsonKey(resIdKey) + sizeOfU8JsonField +
     sizeOfJsonKey(valKey) + sizeOfU16JsonField;
-    
+
   buf[index++] = updateResourceType;
   buf[index++] = jsonDataType;
   buf[index++] = 2; // number of json fields
-  
+
   index += appendJsonKey(&buf[index], resIdKey);
   index += appendJsonU8(&buf[index], resID);
   index += appendJsonKey(&buf[index], valKey);
   index += appendJsonU16(&buf[index], val);
-  
+
+  sendPacket(buf, index);
+}
+
+void chInterface::updateCloudResourceI16(uint8_t resID, int16_t val) {
+  uint8_t buf[64];
+  uint8_t index = 0;
+
+  buf[index++] = 3 +
+    sizeOfJsonKey(resIdKey) + sizeOfU8JsonField +
+    sizeOfJsonKey(valKey) + sizeOfU16JsonField;
+
+  buf[index++] = updateResourceType;
+  buf[index++] = jsonDataType;
+  buf[index++] = 2; // number of json fields
+
+  index += appendJsonKey(&buf[index], resIdKey);
+  index += appendJsonU8(&buf[index], resID);
+  index += appendJsonKey(&buf[index], valKey);
+  index += appendJsonI16(&buf[index], val);
+
   sendPacket(buf, index);
 }
 
@@ -393,31 +489,51 @@ void chInterface::updateCloudResourceU32(uint8_t resID, uint32_t val) {
   uint8_t buf[64];
   uint8_t index = 0;
 
-  buf[index++] = 3 + 
+  buf[index++] = 3 +
     sizeOfJsonKey(resIdKey) + sizeOfU8JsonField +
     sizeOfJsonKey(valKey) + sizeOfU32JsonField;
-    
+
   buf[index++] = updateResourceType;
   buf[index++] = jsonDataType;
   buf[index++] = 2; // number of json fields
-  
+
   index += appendJsonKey(&buf[index], resIdKey);
   index += appendJsonU8(&buf[index], resID);
   index += appendJsonKey(&buf[index], valKey);
   index += appendJsonU32(&buf[index], val);
-  
+
+  sendPacket(buf, index);
+}
+
+void chInterface::updateCloudResourceI32(uint8_t resID, int32_t val) {
+  uint8_t buf[64];
+  uint8_t index = 0;
+
+  buf[index++] = 3 +
+    sizeOfJsonKey(resIdKey) + sizeOfU8JsonField +
+    sizeOfJsonKey(valKey) + sizeOfU32JsonField;
+
+  buf[index++] = updateResourceType;
+  buf[index++] = jsonDataType;
+  buf[index++] = 2; // number of json fields
+
+  index += appendJsonKey(&buf[index], resIdKey);
+  index += appendJsonU8(&buf[index], resID);
+  index += appendJsonKey(&buf[index], valKey);
+  index += appendJsonI32(&buf[index], val);
+
   sendPacket(buf, index);
 }
 
 void chInterface::processChillhubMessagePayload(void) {
   chillhubCallbackFunction callback = NULL;
-  
+
   // got the payload, process the message
   bufIndex = 0;
   payloadLen = recvBuf[bufIndex++];
   msgType = recvBuf[bufIndex++];
   dataType = recvBuf[bufIndex++];
-  
+
   if ((msgType == alarmNotifyMsgType) || (msgType == timeResponseMsgType)) {
     // data is an array, don't care about data type or length
     bufIndex+=2;
@@ -478,7 +594,7 @@ void chInterface::processChillhubMessagePayload(void) {
             payload = payload << 8;
             payload |= recvBuf[bufIndex++];
           }
-          ((chCbFcnU32)callback)(payload);          
+          ((chCbFcnU32)callback)(payload);
           break;
         }
         default:
@@ -497,7 +613,7 @@ void chInterface::ReadFromSerialPort(void) {
     // Get the payload length.  It is one less than the message length.
     if (packetRB.IsFull() == RING_BUFFER_IS_FULL) {
       DebugUart_UartPutString("Ringbuffer was full, removing a byte.\r\n");
-      packetRB.Read(); 
+      packetRB.Read();
     }
     packetRB.Write(Serial.read());
   }
@@ -508,13 +624,13 @@ void chInterface::CheckPacket(void) {
   uint16_t crc = crc_init();
   uint16_t crcSent = (recvBuf[bufIndex-2]<<8) + recvBuf[bufIndex-1];
   bufIndex -= 2;
-  
+
   for(i=0; i<bufIndex; i++) {
     crc = crc_update(crc, &recvBuf[i], 1);
   }
-  
+
   crc = crc_finalize(crc);
-  
+
   if (crc == crcSent) {
     DebugUart_UartPutString("Checksum checks!\r\n");
     processChillhubMessagePayload();
@@ -531,7 +647,7 @@ void chInterface::CheckPacket(void) {
 // state handlers
 uint8_t chInterface::StateHandler_WaitingForStx(void) {
   ReadFromSerialPort();
-  
+
   // process bytes in the buffer
   while(packetRB.IsEmpty() == RING_BUFFER_NOT_EMPTY) {
     if (packetRB.Read() == STX) {
@@ -539,13 +655,13 @@ uint8_t chInterface::StateHandler_WaitingForStx(void) {
       return State_WaitingForLength;
     }
   }
-  
+
   return State_WaitingForStx;
 }
 
 uint8_t chInterface::StateHandler_WaitingForLength(void) {
   ReadFromSerialPort();
-  
+
   if (packetRB.IsEmpty() == RING_BUFFER_NOT_EMPTY) {
     packetLen = packetRB.Peek(0);
     if (packetLen == ESC) {
@@ -569,15 +685,15 @@ uint8_t chInterface::StateHandler_WaitingForLength(void) {
       return State_WaitingForStx;
     }
   }
-  
+
   return State_WaitingForLength;
 }
-  
+
 uint8_t chInterface::StateHandler_WaitingForPacket(void) {
   uint8_t bytesUsed;
   uint8_t b;
   ReadFromSerialPort();
-  
+
   bytesUsed = packetRB.BytesUsed();
   while (bytesUsed > packetIndex) {
     if (packetRB.Peek(packetIndex) == ESC) {
@@ -597,7 +713,7 @@ uint8_t chInterface::StateHandler_WaitingForPacket(void) {
       return State_WaitingForStx;
     }
   }
-  
+
   return State_WaitingForPacket;
 }
 
@@ -605,7 +721,7 @@ void chInterface::loop(void) {
   if (currentState < State_Invalid) {
     if(StateHandlers[currentState] != NULL) {
       currentState = StateHandlers[currentState]();
-    } 
+    }
   }
 }
 
@@ -666,27 +782,27 @@ void chInterface::outputChar(uint8_t c) {
     buf[index++] = ESC;
   }
   buf[index++] = c;
-  
+
   Serial.write(buf, index);
 }
-     
+
 void chInterface::sendPacket(uint8_t *pBuf, uint8_t len){
   uint16_t crc = crc_init();
   uint8_t buf[1];
   uint8_t i;
-  
+
   // send STX
   buf[0] = STX;
   Serial.write(buf, 1);
   // send packet length
   outputChar(len);
-  
+
   // send packet
   for(i=0; i<len; i++) {
     crc = crc_update(crc, &pBuf[i], 1);
     outputChar(pBuf[i]);
   }
-  
+
   // send CS
   outputChar(MSB_OF_U16(crc));
   outputChar(LSB_OF_U16(crc));

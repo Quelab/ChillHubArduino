@@ -19,7 +19,7 @@ struct chCbTableType {
 
 typedef uint8_t (*StateHandler_fp)(void);
 
-class chInterface {  
+class chInterface {
    // Callbacks
   typedef void (*chCbFcnU8)(unsigned char);
   typedef void (*chCbFcnU16)(unsigned int);
@@ -33,7 +33,7 @@ class chInterface {
   static void printU8(uint8_t val);
   static void printU32(uint32_t val);
   static void printI32(int32_t val);
-  
+
   private:
   // the communication states
   enum ECommState {
@@ -62,11 +62,14 @@ class chInterface {
     static uint8_t appendJsonU8(uint8_t *pBuf, uint8_t v);
     static uint8_t appendJsonU16(uint8_t *pBuf, uint16_t v);
     static uint8_t appendJsonU32(uint8_t *pBuf, uint32_t v);
+    static uint8_t appendJsonI8(uint8_t *pBuf, int8_t v);
+    static uint8_t appendJsonI16(uint8_t *pBuf, int16_t v);
+    static uint8_t appendJsonI32(uint8_t *pBuf, int32_t v);
     static uint8_t sizeOfJsonKey(const char *key);
     static void processChillhubMessagePayload(void);
     static void ReadFromSerialPort(void);
     static void CheckPacket(void);
-    static uint8_t StateHandler_WaitingForStx(void); 
+    static uint8_t StateHandler_WaitingForStx(void);
     static uint8_t StateHandler_WaitingForLength(void);
     static uint8_t StateHandler_WaitingForPacket(void);
     static uint8_t currentState;
@@ -76,7 +79,7 @@ class chInterface {
     static void outputChar(uint8_t c);
     static void sendPacket(uint8_t *pBuf, uint8_t len);
 
-  
+
   public:
     chInterface(void);
     static void setup(const char* name, const char *UUID);
@@ -88,15 +91,18 @@ class chInterface {
     static void addCloudListener(unsigned char msgType, chillhubCallbackFunction cb);
     static void createCloudResourceU16(const char *name, uint8_t resId, uint8_t canUpdate, uint16_t initVal);
     static void createCloudResourceU32(const char *name, uint8_t resId, uint8_t canUpdate, uint32_t initVal);
+    static void createCloudResourceI16(const char *name, uint8_t resId, uint8_t canUpdate, int16_t initVal);
+    static void createCloudResourceI32(const char *name, uint8_t resId, uint8_t canUpdate, int32_t initVal);
     static void updateCloudResourceU16(uint8_t resID, uint16_t val);
     static void updateCloudResourceU32(uint8_t resID, uint32_t val);
-    
+    static void updateCloudResourceI16(uint8_t resID, int16_t val);
+    static void updateCloudResourceI32(uint8_t resID, int32_t val);
     static void sendU8Msg(unsigned char msgType, unsigned char payload);
     static void sendU16Msg(unsigned char msgType, unsigned int payload);
     static void sendI8Msg(unsigned char msgType, signed char payload);
     static void sendI16Msg(unsigned char msgType, signed int payload);
     static void sendBooleanMsg(unsigned char msgType, unsigned char payload);
-    
+
     static void loop();
 };
 
